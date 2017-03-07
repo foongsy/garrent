@@ -2,6 +2,7 @@
 import click
 import datetime
 from dateutil import parser
+from garrent.database import pymysql_conn
 
 today = datetime.date.today()
 
@@ -21,9 +22,17 @@ def initdb():
 def update_stock(cleanup):
     if cleanup:
         click.echo('Cleanup existing stock list')
+        try:
+            conn = pymysql_conn()
+            with conn.cursor() as cursor:
+                sql = 'TRUNCATE stock;'
+                cursor.execute(sql)
+            conn.commit()
+        finally:
+            conn.close()
     click.echo('Updating Hong Kong stock list')
-    #from garrent.tasks import insert_stock
-    #insert_stock()
+    from garrent.tasks import insert_stock
+    insert_stock()
 
 @run.command()
 def update_ccassplayers():

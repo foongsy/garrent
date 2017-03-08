@@ -76,15 +76,17 @@ def update_buyback(date,daysback):
 def update_shareholder(date,daysback):
     if date:
         p_date = parser.parse(date)
+        from garrent.tasks import insert_share_holding
         click.echo('- Date specified {}...'.format(date))
         from garrent.pw_models import Stock
-        s = Stock.select()
+        stocks = Stock.select().where(Stock.board == 'M').limit(2)
         if daysback:
             start_date = p_date - datetime.timedelta(days=daysback)
             click.echo('- Start from {} till {}'.format(datetime.date.strftime(start_date, "%Y-%m-%d"),datetime.date.strftime(p_date, "%Y-%m-%d")))
-
-
-
+            for s in stocks:
+                #click.echo(' pulling: {} {} {}'.format(s.code,start_date,p_date))
+                insert_share_holding(s.code, start_date, p_date)
+            click.echo('- Done')
 
 
 if __name__ == '__main__':

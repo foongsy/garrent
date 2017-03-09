@@ -284,6 +284,7 @@ def get_disclosure_interests(code, start_date: datetime.date, end_date: datetime
     response = requests.get(url)
     if response.status_code == 200:
         search_soup = BeautifulSoup(response.content, "lxml")
+        print(response.content)
         table = search_soup.find(id="grdPaging")
         if table:
             tag_a = table.find("a", text="大股東名單")

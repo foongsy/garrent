@@ -346,7 +346,7 @@ class TopTen(Base, BaseMixin2):
     market = Column(Enum("SH", "SZ"))  # Shanghai, Shenzhen
     total = Column(BigInteger)  # HKD
 
-    __table_args__ = (UniqueConstraint("date", "code", name="_date_code"),)
+    __table_args__ = (UniqueConstraint("date", "code", "market", name="_date_code_market"),)
 
     @classmethod
     def exist(cls, date, code):

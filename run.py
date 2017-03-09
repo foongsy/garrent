@@ -3,6 +3,8 @@ import click
 import datetime
 from dateutil import parser, rrule
 from garrent.database import pymysql_conn
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 today = datetime.date.today()
 
@@ -27,7 +29,7 @@ def status():
 
 @run.command()
 @click.option('--cleanup', is_flag=True, help='Empty the list before updating')
-def update_stock(cleanup):
+def stock(cleanup):
     if cleanup:
         click.echo('Cleanup existing stock list')
         try:
@@ -43,15 +45,26 @@ def update_stock(cleanup):
     insert_stock()
 
 @run.command()
-def update_ccassplayers():
-    click.echo('Updating CCASS players')
+@click.option('--cleanup', is_flag=True, help='Empty the list before updating')
+def ccassplayer(cleanup):
+    if cleanup:
+        click.echo('Cleanup existing CCASS player list')
+        try:
+            conn = pymysql_conn()
+            with conn.cursor() as cursor:
+                sql = 'TRUNCATE ccass_player;'
+                cursor.execute(sql)
+            conn.commit()
+        finally:
+            conn.close()
+    click.echo('Updating CCASS player')
     from garrent.tasks import insert_ccass_player
-    #insert_ccass_player()
+    insert_ccass_player()
 
 @run.command()
 @click.option('--daysback', nargs=1, type=int, help="Update buyback from N days before specific date, inclusively")
 @click.argument('date', type=str) #, help="Update buyback for the date, (YYYY-MM-DD)")
-def update_buyback(date,daysback):
+def buyback(date,daysback):
     if date:
         p_date = parser.parse(date)
         from garrent.tasks import insert_repurchases_report
@@ -73,7 +86,7 @@ def update_buyback(date,daysback):
 @run.command()
 @click.option('--daysback', nargs=1, type=int, help="Update shareholding from N days before specific date, inclusively")
 @click.argument('date', type=str)
-def update_shareholder(date,daysback):
+def shareholder(date,daysback):
     if date:
         p_date = parser.parse(date)
         from garrent.tasks import insert_share_holding
@@ -88,6 +101,30 @@ def update_shareholder(date,daysback):
                 insert_share_holding(s.code, start_date, p_date)
             click.echo('- Done')
 
+@run.command()
+@click.argument('date', type=str)
+def ccass(date):
+    if date:
+        logging.debug('[ccass] date: {}'.format(date))
+        p_date = parser.parse(date)
+        click.echo('- Date specified {}...'.format(date))
+        from garrent.tasks import insert_ccass_stock_holding_and_snapshot
+        from garrent.pw_models import Stock
+        stocks = Stock.select().where(Stock.board == 'M').limit(100)
+        logging.debug('[ccass] number of stocks to be process: {}'.format(len(stocks)))
+        for s in stocks:
+            logging.debug('[ccass] working on: {}, {}'.format(s.code,p_date))
+            insert_ccass_stock_holding_and_snapshot(s.code,p_date)
+
+@run.command()
+@click.argument('date', type=str)
+def sbtop10(date):
+    if date:
+        logging.debug('[sbtop10] date: {}'.format(date))
+        p_date = parser.parse(date)
+        click.echo('- Date specified {}...'.format(date))
+        from garrent.tasks import insert_stock_top_10
+        insert_stock_top_10(p_date)
 
 if __name__ == '__main__':
     run()

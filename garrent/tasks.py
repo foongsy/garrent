@@ -421,18 +421,17 @@ def _insert_top_10(dataframe, date, market):
             sell_turnover = row["Sell Turnover"]
             total_turnover = row["Total Turnover"]
             rank = row["Rank"]
+            #if not TopTen.exist(date, code):
+            instance = TopTen()
+            instance.code = code
+            instance.date = date
+            instance.rank = int(rank)
+            instance.market = market
+            instance.buy = int(buy_turnover.replace(",", ""))
+            instance.sell = int(sell_turnover.replace(",", ""))
+            instance.total = int(total_turnover.replace(",", ""))
 
-            if not TopTen.exist(date, code):
-                instance = TopTen()
-                instance.code = code
-                instance.date = date
-                instance.rank = int(rank)
-                instance.market = market
-                instance.buy = int(buy_turnover.replace(",", ""))
-                instance.sell = int(sell_turnover.replace(",", ""))
-                instance.total = int(total_turnover.replace(",", ""))
-
-                stock_list.append(instance)
+            stock_list.append(instance)
         database_session.bulk_save_objects(stock_list)
         database_session.commit()
 

@@ -127,6 +127,41 @@ def sbtop10(date):
         from garrent.tasks import insert_stock_top_10
         insert_stock_top_10(p_date)
 
+@run.command()
+@click.argument('date', type=str)
+def shortsell(date):
+    if date:
+        logging.debug('[shortsell] date: {}'.format(date))
+        p_date = parser.parse(date)
+        click.echo('- Date specified {}...'.format(date))
+        from garrent.tasks import insert_short_sell
+        insert_short_sell(date)
+
+@run.command()
+def ipo():
+    #from garrent.tasks import insert_list_IPO
+    #insert_list_IPO()
+    from garrent.tasks import inster_stock_IPO_info
+    from garrent.pw_models import StockIpo
+    stocks = StockIpo.select(StockIpo.code).where(StockIpo.company_name.is_null())
+    for s in stocks:
+        inster_stock_IPO_info(s.code)
+        logging.debug('[ipo_info] : {}'.format(s.code))
+
+
+@run.command()
+@click.argument('date', type=str)
+def sbstock(date):
+    pass
+
+
+#insert_sse_hk_stock
+#insert_hk_stock_change
+#insert_list_IPO
+#insert_stock_connect
+#inster_stock_IPO_info
+
+
 if __name__ == '__main__':
     run()
 

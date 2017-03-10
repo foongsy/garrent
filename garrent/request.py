@@ -481,7 +481,7 @@ def get_HK_IPO():
         return result_frame
 
 
-def get_compay_summary(code):
+def get_company_summary(code):
     """
     http://www.aastocks.com/tc/ipo/companysummary.aspx?symbol=02293&view=1
     :param code:

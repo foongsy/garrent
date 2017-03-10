@@ -140,7 +140,7 @@ def inster_stock_IPO_info(code):
     :param code:
     :return:
     """
-    ipo_summary = request.get_compay_summary(code)
+    ipo_summary = request.get_company_summary(code)
 
     if ipo_summary:
 

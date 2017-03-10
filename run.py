@@ -95,11 +95,12 @@ def shareholder(date,daysback):
         stocks = Stock.select().where(Stock.board == 'M').limit(2)
         if daysback:
             start_date = p_date - datetime.timedelta(days=daysback)
-            click.echo('- Start from {} till {}'.format(datetime.date.strftime(start_date, "%Y-%m-%d"),datetime.date.strftime(p_date, "%Y-%m-%d")))
-            for s in stocks:
-                #click.echo(' pulling: {} {} {}'.format(s.code,start_date,p_date))
-                insert_share_holding(s.code, start_date, p_date)
-            click.echo('- Done')
+        else:
+            start_date = p_date
+        click.echo('- Start from {} till {}'.format(datetime.date.strftime(start_date, "%Y-%m-%d"),datetime.date.strftime(p_date, "%Y-%m-%d")))
+        for s in stocks:
+            insert_share_holding(s.code, start_date, p_date)
+        click.echo('- Done')
 
 @run.command()
 @click.argument('date', type=str)
@@ -110,7 +111,7 @@ def ccass(date):
         click.echo('- Date specified {}...'.format(date))
         from garrent.tasks import insert_ccass_stock_holding_and_snapshot
         from garrent.pw_models import Stock
-        stocks = Stock.select().where(Stock.board == 'M').limit(100)
+        stocks = Stock.select().where(Stock.code == '06068').limit(100)
         logging.debug('[ccass] number of stocks to be process: {}'.format(len(stocks)))
         for s in stocks:
             logging.debug('[ccass] working on: {}, {}'.format(s.code,p_date))
@@ -125,6 +126,41 @@ def sbtop10(date):
         click.echo('- Date specified {}...'.format(date))
         from garrent.tasks import insert_stock_top_10
         insert_stock_top_10(p_date)
+
+@run.command()
+@click.argument('date', type=str)
+def shortsell(date):
+    if date:
+        logging.debug('[shortsell] date: {}'.format(date))
+        p_date = parser.parse(date)
+        click.echo('- Date specified {}...'.format(date))
+        from garrent.tasks import insert_short_sell
+        insert_short_sell(date)
+
+@run.command()
+def ipo():
+    #from garrent.tasks import insert_list_IPO
+    #insert_list_IPO()
+    from garrent.tasks import inster_stock_IPO_info
+    from garrent.pw_models import StockIpo
+    stocks = StockIpo.select(StockIpo.code).where(StockIpo.company_name.is_null())
+    for s in stocks:
+        inster_stock_IPO_info(s.code)
+        logging.debug('[ipo_info] : {}'.format(s.code))
+
+
+@run.command()
+@click.argument('date', type=str)
+def sbstock(date):
+    pass
+
+
+#insert_sse_hk_stock
+#insert_hk_stock_change
+#insert_list_IPO
+#insert_stock_connect
+#inster_stock_IPO_info
+
 
 if __name__ == '__main__':
     run()

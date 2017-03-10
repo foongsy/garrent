@@ -13,7 +13,7 @@ from garrent.models import (Stock,
                             ShortSell,
                             Repurchase,
                             StockIPO,
-                            SH_HK_Stock,
+                            CN_HK_Stock,
                             StockChange,
                             TopTen,
                             HkSnapshot)
@@ -179,6 +179,7 @@ def inster_stock_IPO_info(code):
                 "open_date_during": [ipo_summary["application_date_start"], ipo_summary["aplication_date_end"]],
                 "price_range": price_range
             })
+
 
 """ daily tasks """
 
@@ -349,13 +350,64 @@ def insert_short_sell(date):
             logger.exception(e)
 
 
-#@celery_app.task(ignore_result=True)
+def insert_sz_hk_stock():
+    """
+    :return:
+    """
+    dataframe = request.get_sz_hk_stock()
+
+    if dataframe is not None and not dataframe.empty:
+        stock_list = []
+        for index, row in dataframe.iterrows():
+            code = row["证券代码"]
+            cn_name = row["中文名称"]
+
+            if not SH_HK_Stock.exist(code):
+                instance = CN_HK_Stock()
+                instance.code = code
+                instance.cn_name = cn_name
+                instance.market = "SZ"
+                stock_list.append(instance)
+
+        database_session.bulk_save_objects(stock_list)
+        database_session.commit()
+
+
+def insert_sz_hk_stock_change():
+    """
+
+    :return:
+    """
+    dataframe = request.get_sz_hk_stock()
+
+    if dataframe is not None and not dataframe.empty:
+        stock_list = []
+        for index, row in dataframe.iterrows():
+            code = row["港股代码"]
+            cn_name = row["中文简称"]
+
+            change_date = parser.parse(row["调整生效日期"])
+            change = "IN" if row["调整内容"] == "调入" else "OUT"
+
+            if not StockChange.exist(code, change_date, change):
+                instance = StockChange()
+                instance.code = code
+                instance.change_date = change_date
+                instance.cn_name = cn_name
+                instance.change = change
+                instance.market = "SZ"
+                stock_list.append(instance)
+
+        database_session.bulk_save_objects(stock_list)
+        database_session.commit()
+
+
+# @celery_app.task(ignore_result=True)
 def insert_sse_hk_stock():
     """
     :return:
     """
     sse_frame = request.get_sse_hk_stock()
-    #print(sse_frame)
 
     if sse_frame is not None and not sse_frame.empty:
 
@@ -365,23 +417,22 @@ def insert_sse_hk_stock():
             code = row["证券代码"]
             cn_name = row["中文简称"]
 
-            if not SH_HK_Stock.exist(code):
-                instance = SH_HK_Stock()
+            if not CN_HK_Stock.exist(code):
+                instance = CN_HK_Stock()
                 instance.code = code
                 instance.cn_name = cn_name
+                instance.market = "SH"
                 stock_list.append(instance)
         database_session.bulk_save_objects(stock_list)
         database_session.commit()
 
 
-#@celery_app.task(ingore_result=True)
+# @celery_app.task(ingore_result=True)
 def insert_hk_stock_change():
     """
     :return:
     """
     change_frame = request.get_sse_hk_stock_change()
-
-    #print(change_frame)
 
     if change_frame is not None and not change_frame.empty:
         stock_list = []
@@ -399,6 +450,7 @@ def insert_hk_stock_change():
                 instance.change_date = change_date
                 instance.cn_name = cn_name
                 instance.change = change
+                instance.market = "SH"
                 stock_list.append(instance)
 
         database_session.bulk_save_objects(stock_list)
@@ -421,17 +473,17 @@ def _insert_top_10(dataframe, date, market):
             sell_turnover = row["Sell Turnover"]
             total_turnover = row["Total Turnover"]
             rank = row["Rank"]
-            #if not TopTen.exist(date, code):
-            instance = TopTen()
-            instance.code = code
-            instance.date = date
-            instance.rank = int(rank)
-            instance.market = market
-            instance.buy = int(buy_turnover.replace(",", ""))
-            instance.sell = int(sell_turnover.replace(",", ""))
-            instance.total = int(total_turnover.replace(",", ""))
+            if not TopTen.exist(date, code, market):
+                instance = TopTen()
+                instance.code = code
+                instance.date = date
+                instance.rank = int(rank)
+                instance.market = market
+                instance.buy = int(buy_turnover.replace(",", ""))
+                instance.sell = int(sell_turnover.replace(",", ""))
+                instance.total = int(total_turnover.replace(",", ""))
 
-            stock_list.append(instance)
+                stock_list.append(instance)
         database_session.bulk_save_objects(stock_list)
         database_session.commit()
 

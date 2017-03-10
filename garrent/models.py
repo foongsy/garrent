@@ -349,13 +349,16 @@ class TopTen(Base, BaseMixin2):
     __table_args__ = (UniqueConstraint("date", "code", "market", name="_date_code_market"),)
 
     @classmethod
-    def exist(cls, date, code):
+    def exist(cls, date, code, market):
         """
         :param date:
         :param code:
         :return:
         """
-        return database_session.query(exists().where(and_(cls.code == code, cls.date == date))).scalar()
+        return database_session.query(exists().where(and_(cls.code == code,
+                                                          cls.date == date,
+                                                          cls.market == market))).scalar()
+
 
 
 class StockChange(Base, BaseMixin2):
@@ -373,6 +376,7 @@ class StockChange(Base, BaseMixin2):
     change = Column(Enum("IN", "OUT"))
     change_date = Column(Date)
     date = Column(Date, default=py_date.today)
+    market = Column(Enum("SH", "SZ"))
 
     __table_args__ = (UniqueConstraint("change_date", "code", "change", name="_change_date_code_change"),)
 
@@ -385,14 +389,14 @@ class StockChange(Base, BaseMixin2):
                                                           cls.change == change))).scalar()
 
 
-class SH_HK_Stock(Base, BaseMixin2):
+class CN_HK_Stock(Base, BaseMixin2):
     """
     """
     __tablename__ = "sb_stock"
     code = Column(String(20), unique=True)
     cn_name = Column(NVARCHAR(50))
     date = Column(Date, default=py_date.today)
-
+    market = Column(Enum("SH", "SZ"))
     @classmethod
     def exist(cls, code):
         """

@@ -606,3 +606,29 @@ def get_compay_summary(code):
             "sponsor": sponsor,
             "underwriters": underwriters
         }
+
+def get_sz_hk_stock():
+    """
+    港股通标的证券名单
+    http://www.szse.cn/main/szhk/ggtywxx/bdzqmd/
+    :return:
+    """
+    url = ("http://www.szse.cn/szseWeb/ShowReport.szse?"
+           "SHOWTYPE=xlsx&CATALOGID=SGT_GGTBDQD&tab1PAGENUM=1&ENCODE=1&TABKEY=tab1")
+
+    data_frame =  pandas.read_excel(url,converters={"港股代码":str})
+    return data_frame
+
+def get_sz_hk_change():
+    """
+    深港通名單變動
+    http://www.szse.cn/main/szhk/ggtywxx/bdzqtz/
+    :return:
+    """
+    url = ("http://www.szse.cn/szseWeb/ShowReport.szse?"
+           "SHOWTYPE=xlsx&CATALOGID=SGT_GGTBDTZ&tab1PAGENUM=1&ENCODE=1&TABKEY=tab1")
+
+    data_frame = pandas.read_excel(url,converters={"港股代码":str})
+
+    return data_frame
+

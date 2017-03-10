@@ -19,7 +19,6 @@ os.environ["EXECJS_RUNTIME"] = "PhantomJS"
 
 logger = logging.getLogger(__name__)
 
-
 class RequestError(Exception):
     pass
 
@@ -169,7 +168,6 @@ def get_CCASS_stock_holding_and_snapshot(code, date):
 
     url = "http://www.hkexnews.hk/sdw/search/searchsdw_c.aspx"
     response = requests.get(url)
-
     if response.status_code == 200:
         form_soup = BeautifulSoup(response.content, "lxml")
 
@@ -283,8 +281,7 @@ def get_disclosure_interests(code, start_date: datetime.date, end_date: datetime
                                                 code=code)
     response = requests.get(url)
     if response.status_code == 200:
-        search_soup = BeautifulSoup(response.content, "lxml")
-        print(response.content)
+        search_soup = BeautifulSoup(response.content, "html5lib")
         table = search_soup.find(id="grdPaging")
         if table:
             tag_a = table.find("a", text="大股東名單")
@@ -292,7 +289,7 @@ def get_disclosure_interests(code, start_date: datetime.date, end_date: datetime
                 link = base_link + tag_a["href"]
                 disclosure_response = requests.get(link)
                 if disclosure_response.status_code == 200:
-                    soup = BeautifulSoup(disclosure_response.content, "lxml")
+                    soup = BeautifulSoup(disclosure_response.content, "html5lib")
                     disclosure_table = soup.find("table", id="grdPaging")
                     disclosure_data = pandas.read_html(disclosure_table.prettify(), flavor="bs4")
                     disclosure_data = disclosure_data[0]

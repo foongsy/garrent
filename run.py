@@ -95,11 +95,12 @@ def shareholder(date,daysback):
         stocks = Stock.select().where(Stock.board == 'M').limit(2)
         if daysback:
             start_date = p_date - datetime.timedelta(days=daysback)
-            click.echo('- Start from {} till {}'.format(datetime.date.strftime(start_date, "%Y-%m-%d"),datetime.date.strftime(p_date, "%Y-%m-%d")))
-            for s in stocks:
-                #click.echo(' pulling: {} {} {}'.format(s.code,start_date,p_date))
-                insert_share_holding(s.code, start_date, p_date)
-            click.echo('- Done')
+        else:
+            start_date = p_date
+        click.echo('- Start from {} till {}'.format(datetime.date.strftime(start_date, "%Y-%m-%d"),datetime.date.strftime(p_date, "%Y-%m-%d")))
+        for s in stocks:
+            insert_share_holding(s.code, start_date, p_date)
+        click.echo('- Done')
 
 @run.command()
 @click.argument('date', type=str)
@@ -110,7 +111,7 @@ def ccass(date):
         click.echo('- Date specified {}...'.format(date))
         from garrent.tasks import insert_ccass_stock_holding_and_snapshot
         from garrent.pw_models import Stock
-        stocks = Stock.select().where(Stock.board == 'M').limit(100)
+        stocks = Stock.select().where(Stock.code == '06068').limit(100)
         logging.debug('[ccass] number of stocks to be process: {}'.format(len(stocks)))
         for s in stocks:
             logging.debug('[ccass] working on: {}, {}'.format(s.code,p_date))

@@ -575,7 +575,7 @@ def insert_list_IPO():
             if not StockIPO.exist(code):
                 instance = StockIPO()
                 instance.code = code
-                instance.name = name
+                instance.company_name = name
                 instance.industry = industry
                 instance.ipo_date = ipo_date
 

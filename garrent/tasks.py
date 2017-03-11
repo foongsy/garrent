@@ -356,13 +356,15 @@ def insert_sz_hk_stock():
     """
     dataframe = request.get_sz_hk_stock()
 
+
+
     if dataframe is not None and not dataframe.empty:
         stock_list = []
         for index, row in dataframe.iterrows():
-            code = row["证券代码"]
-            cn_name = row["中文名称"]
+            code = row["港股代码"]
+            cn_name = row["中文简称"]
 
-            if not SH_HK_Stock.exist(code):
+            if not CN_HK_Stock.exist(code):
                 instance = CN_HK_Stock()
                 instance.code = code
                 instance.cn_name = cn_name
@@ -378,7 +380,7 @@ def insert_sz_hk_stock_change():
 
     :return:
     """
-    dataframe = request.get_sz_hk_stock()
+    dataframe = request.get_sz_hk_change()
 
     if dataframe is not None and not dataframe.empty:
         stock_list = []

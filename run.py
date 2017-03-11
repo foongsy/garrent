@@ -4,7 +4,7 @@ import datetime
 from dateutil import parser, rrule
 from garrent.database import pymysql_conn
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 today = datetime.date.today()
 
@@ -92,7 +92,7 @@ def shareholder(date,daysback):
         from garrent.tasks import insert_share_holding
         click.echo('- Date specified {}...'.format(date))
         from garrent.pw_models import Stock
-        stocks = Stock.select().where(Stock.board == 'M').limit(2)
+        stocks = Stock.select().where(Stock.board == 'M')
         if daysback:
             start_date = p_date - datetime.timedelta(days=daysback)
         else:

@@ -144,8 +144,9 @@ def inster_stock_IPO_info(code):
 
     if ipo_summary:
 
-        price_range = ipo_summary["price_range"].split("-")
-        price_range = list(map(float, price_range))
+        if ipo_summary["price_range"]:
+            price_range = ipo_summary["price_range"].split("-")
+            price_range = list(map(float, price_range))
         if not StockIPO.exist(code):
             instance = StockIPO()
             instance.code = code

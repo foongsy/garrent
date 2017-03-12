@@ -555,10 +555,10 @@ def get_company_summary(code):
             lot_size = int(lot_size)
 
         price_range_td = table.find("td", text=re.compile(r"招股價"))
-        price_range  = price_range_td.findNext().text.strip()
+        price_range = price_range_td.findNext().text.strip()
 
         if "N/A" in price_range:
-            ipo_price = None
+            price_range = None
 
         def sear_shares(tag):
             return tag.name == "td" and "香港配售股份數目" in tag.text

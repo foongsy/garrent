@@ -353,17 +353,18 @@ def insert_short_sell(date):
 
 def insert_sz_hk_stock():
     """
+
     :return:
     """
     dataframe = request.get_sz_hk_stock()
-
-
 
     if dataframe is not None and not dataframe.empty:
         stock_list = []
         for index, row in dataframe.iterrows():
             code = row["港股代码"]
-            cn_name = row["中文简称"]
+            cn_name = is_NaN(row["中文简称"])
+            if is_NaN(cn_name):
+                cn_name = None
 
             if not CN_HK_Stock.exist(code):
                 instance = CN_HK_Stock()
@@ -596,3 +597,4 @@ def insert_list_IPO():
 
         database_session.bulk_save_objects(ipo_list)
         database_session.commit()
+

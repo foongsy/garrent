@@ -228,16 +228,17 @@ class Repurchase(Base, BaseMixin):
     price_per_share = Column(Float(precision=2))
 
     # set unique with
-    __table_args__ = (UniqueConstraint("code", "trading_date", name="_code_trading_date"),)
+    __table_args__ = (UniqueConstraint("code", "date", "trading_date", name="_code_dates"),)
 
     @classmethod
-    def exist(cls, code, trade_date):
+    def exist(cls, code, date, trade_date):
         """
         :param code:
         :param trade_date:
         :return: bool
         """
         return database_session.query(exists().where(and_(cls.code == code,
+                                                          cls.date == date,
                                                           cls.trading_date == trade_date))).scalar()
 
 

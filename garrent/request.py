@@ -20,6 +20,7 @@ from garrent.utils import convert_code, parse_int
 os.environ["EXECJS_RUNTIME"] = "PhantomJS"
 
 logger = logging.getLogger(__name__)
+fakeua = UserAgent()
 
 class RequestError(Exception):
     pass
@@ -180,6 +181,8 @@ def get_CCASS_stock_holding_and_snapshot(code, date):
         today = datetime.date.today()
         headers = {"Host": "www.hkexnews.hk",
                    "Origin": "http://www.hkexnews.hk",
+                   "Connection" : "close",
+                   "User-Agent" : fakeua.random,
                    "Referer": url}
 
         data = {"today": today.strftime("%Y%m%d"),
@@ -232,7 +235,9 @@ def get_daily_repurchases_report(date: datetime.date):
         date = parser.parse(date).date()
     date_format = date.strftime("%Y%m%d")
     url = "http://www.hkexnews.hk/reports/sharerepur/documents/SRRPT{date}.xls".format(date=date_format)
-
+    headers = {
+        "Connection" : "close",
+        "User-Agent" : fakeua.random}
     response = requests.get(url)
     if response.status_code == 200:
         excel_data = io.BytesIO(response.content)

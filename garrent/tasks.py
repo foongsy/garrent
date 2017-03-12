@@ -18,7 +18,7 @@ from garrent.models import (Stock,
                             TopTen,
                             HkSnapshot)
 from garrent import request
-from garrent.utils import parse_int, is_NaN, convert_currency, convert_code, convert_float
+from garrent.utils import parse_int, is_NaN, convert_currency, convert_code, convert_float, parse_float
 
 logger = logging.getLogger(__name__)
 
@@ -292,14 +292,14 @@ def insert_repurchases_report(date):
                 ytd_vol = row[9]
                 percent_of_mandate = row[10]
 
-                if not Repurchase.exist(code, trade_date):
+                if not Repurchase.exist(code, date, trade_date):
                     model = Repurchase()
                     model.code = code
                     model.date = date
                     model.total_paid = total_paid
-                    model.percent_of_mandate = percent_of_mandate
+                    model.percent_of_mandate = parse_float(percent_of_mandate)
                     model.trading_date = trade_date
-                    model.ytd_vol = ytd_vol
+                    model.ytd_vol = parse_int(ytd_vol)
                     model.vol = vol
                     model.lowest_px = lowest_px
                     model.price_per_share = price_per_share

@@ -43,6 +43,15 @@ def convert_float(value):
     else:
         return result
 
+def parse_float(value):
+    """
+    convert number value like `2,354.23 Note` to float
+    :param value:
+    :return:
+    """
+    value = value.replace(",", "")
+    return re.search(r'\d+\.\d+', value).group()
+
 def parse_int(value):
     """
     convert number value like 796,529,786(L) to int

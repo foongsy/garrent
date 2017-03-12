@@ -362,9 +362,10 @@ def insert_sz_hk_stock():
         stock_list = []
         for index, row in dataframe.iterrows():
             code = row["港股代码"]
-            cn_name = is_NaN(row["中文简称"])
-            if is_NaN(cn_name):
+            if is_NaN(row["中文简称"]):
                 cn_name = None
+            else:
+                cn_name =row["中文简称"]
 
             if not CN_HK_Stock.exist(code):
                 instance = CN_HK_Stock()
@@ -597,4 +598,3 @@ def insert_list_IPO():
 
         database_session.bulk_save_objects(ipo_list)
         database_session.commit()
-

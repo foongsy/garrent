@@ -297,9 +297,9 @@ def insert_repurchases_report(date):
                     model.code = code
                     model.date = date
                     model.total_paid = total_paid
-                    model.percent_of_mandate = parse_float(percent_of_mandate)
+                    model.percent_of_mandate = parse_float(str(percent_of_mandate))
                     model.trading_date = trade_date
-                    model.ytd_vol = parse_int(ytd_vol)
+                    model.ytd_vol = parse_int(str(ytd_vol))
                     model.vol = vol
                     model.lowest_px = lowest_px
                     model.price_per_share = price_per_share

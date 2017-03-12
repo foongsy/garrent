@@ -4,7 +4,7 @@ import datetime
 from dateutil import parser, rrule
 from garrent.database import pymysql_conn
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 today = datetime.date.today()
 
@@ -73,7 +73,8 @@ def buyback(date,daysback):
             start_date = p_date - datetime.timedelta(days=daysback)
             click.echo('- Start from {} days back: {}'.format(daysback, datetime.date.strftime(start_date, "%Y-%m-%d")))
             for cur_date in rrule.rrule(freq=rrule.DAILY,dtstart=start_date,until=p_date):
-                insert_repurchases_report(cur_date)
+                if cur_date.weekday() < 5:
+                    insert_repurchases_report(cur_date)
             click.echo('- Done')
         else:
             insert_repurchases_report(p_date)
@@ -154,7 +155,7 @@ def sbstock():
     from garrent.tasks import insert_sz_hk_stock
     from garrent.tasks import insert_sse_hk_stock
     insert_sse_hk_stock()
-    #insert_sz_hk_stock()
+    insert_sz_hk_stock()
 
 
 #insert_sse_hk_stock

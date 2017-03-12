@@ -13,6 +13,8 @@ from bs4 import BeautifulSoup
 from dateutil import parser
 from selenium import webdriver
 
+from fake_useragent import UserAgent
+
 from garrent.utils import convert_code, parse_int
 
 os.environ["EXECJS_RUNTIME"] = "PhantomJS"
@@ -265,7 +267,8 @@ def get_disclosure_interests(code, start_date: datetime.date, end_date: datetime
     :param end_date: datetime.date
     :return: DataFrame or None
     """
-
+    ua = UserAgent()
+    headers = {"Connection" : "close", "User-Agent" : ua.random}
     if isinstance(start_date, str):
         start_date = parser.parse(start_date).date()
     if isinstance(end_date, str):
@@ -279,7 +282,7 @@ def get_disclosure_interests(code, start_date: datetime.date, end_date: datetime
            "sc={code}&src=MAIN&lang=ZH").format(start_date=start_date.strftime("%d/%m/%Y"),
                                                 end_date=end_date.strftime("%d/%m/%Y"),
                                                 code=code)
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
     if response.status_code == 200:
         search_soup = BeautifulSoup(response.content, "html5lib")
         table = search_soup.find(id="grdPaging")
@@ -287,7 +290,7 @@ def get_disclosure_interests(code, start_date: datetime.date, end_date: datetime
             tag_a = table.find("a", text="大股東名單")
             if tag_a:
                 link = base_link + tag_a["href"]
-                disclosure_response = requests.get(link)
+                disclosure_response = requests.get(link, headers=headers)
                 if disclosure_response.status_code == 200:
                     soup = BeautifulSoup(disclosure_response.content, "html5lib")
                     disclosure_table = soup.find("table", id="grdPaging")
@@ -628,4 +631,3 @@ def get_sz_hk_change():
     data_frame = pandas.read_excel(url,converters={"港股代码":str})
 
     return data_frame
-

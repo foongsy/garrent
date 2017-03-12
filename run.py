@@ -4,7 +4,7 @@ import datetime
 from dateutil import parser, rrule
 from garrent.database import pymysql_conn
 import logging
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.DEBUG)
 
 today = datetime.date.today()
 
@@ -150,9 +150,11 @@ def ipo():
 
 
 @run.command()
-@click.argument('date', type=str)
-def sbstock(date):
-    pass
+def sbstock():
+    from garrent.tasks import insert_sz_hk_stock
+    from garrent.tasks import insert_sse_hk_stock
+    insert_sse_hk_stock()
+    #insert_sz_hk_stock()
 
 
 #insert_sse_hk_stock

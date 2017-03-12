@@ -238,7 +238,7 @@ def get_daily_repurchases_report(date: datetime.date):
     headers = {
         "Connection" : "close",
         "User-Agent" : fakeua.random}
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
     if response.status_code == 200:
         excel_data = io.BytesIO(response.content)
         # try to escape row in the col

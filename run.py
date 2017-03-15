@@ -6,7 +6,13 @@ from garrent.database import pymysql_conn
 import logging
 logging.basicConfig(level=logging.INFO)
 
+from rq import Queue
+from redis import Redis
+
 today = datetime.date.today()
+
+redis_conn = Redis()
+ccass_q = Queue('ccass',connection=redis_conn)
 
 @click.group()
 def run():
@@ -102,6 +108,21 @@ def shareholder(date,daysback):
         for s in stocks:
             insert_share_holding(s.code, start_date, p_date)
         click.echo('- Done')
+
+@run.command()
+@click.argument('date', type=str)
+def q_ccass(date):
+    if date:
+        logging.debug('[ccass] date: {}'.format(date))
+        p_date = parser.parse(date)
+        click.echo('- Date specified {}...'.format(date))
+        from garrent.tasks import insert_ccass_stock_holding_and_snapshot
+        from garrent.pw_models import Stock
+        stocks = Stock.select().limit(100)
+        logging.debug('[ccass] number of stocks to be process: {}'.format(len(stocks)))
+        for s in stocks:
+            logging.debug('[ccass] working on: {}, {}'.format(s.code,p_date.date))
+            ccass_q.enqueue(insert_ccass_stock_holding_and_snapshot,s.code,p_date)
 
 @run.command()
 @click.argument('date', type=str)

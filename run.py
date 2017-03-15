@@ -4,7 +4,7 @@ import datetime
 from dateutil import parser, rrule
 from garrent.database import pymysql_conn
 import logging
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 
 today = datetime.date.today()
 
@@ -112,10 +112,10 @@ def ccass(date):
         click.echo('- Date specified {}...'.format(date))
         from garrent.tasks import insert_ccass_stock_holding_and_snapshot
         from garrent.pw_models import Stock
-        stocks = Stock.select().where(Stock.code == '06068').limit(100)
+        stocks = Stock.select()
         logging.debug('[ccass] number of stocks to be process: {}'.format(len(stocks)))
         for s in stocks:
-            logging.debug('[ccass] working on: {}, {}'.format(s.code,p_date))
+            logging.debug('[ccass] working on: {}, {}'.format(s.code,p_date.date))
             insert_ccass_stock_holding_and_snapshot(s.code,p_date)
 
 @run.command()

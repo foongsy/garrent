@@ -394,14 +394,14 @@ class CN_HK_Stock(Base, BaseMixin2):
     """
     """
     __tablename__ = "sb_stock"
-    code = Column(String(20), unique=True)
+    code = Column(String(20))
     cn_name = Column(NVARCHAR(50))
     date = Column(Date, default=py_date.today)
     market = Column(Enum("SH", "SZ"))
     @classmethod
-    def exist(cls, code):
+    def exist(cls, code, market):
         """
         :param code:
         :return:
         """
-        return database_session.query(exists().where(cls.code == code)).scalar()
+        return database_session.query(exists().where(and_(cls.code == code, cls.market == market))).scalar()

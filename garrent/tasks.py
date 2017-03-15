@@ -357,7 +357,7 @@ def insert_sz_hk_stock():
     :return:
     """
     dataframe = request.get_sz_hk_stock()
-
+    market = 'SZ'
     if dataframe is not None and not dataframe.empty:
         stock_list = []
         for index, row in dataframe.iterrows():
@@ -366,12 +366,11 @@ def insert_sz_hk_stock():
                 cn_name = None
             else:
                 cn_name =row["中文简称"]
-
-            if not CN_HK_Stock.exist(code):
+            if not CN_HK_Stock.exist(code, market):
                 instance = CN_HK_Stock()
                 instance.code = code
                 instance.cn_name = cn_name
-                instance.market = "SZ"
+                instance.market = market
                 stock_list.append(instance)
 
         database_session.bulk_save_objects(stock_list)
@@ -384,7 +383,7 @@ def insert_sz_hk_stock_change():
     :return:
     """
     dataframe = request.get_sz_hk_change()
-
+    market = 'SZ'
     if dataframe is not None and not dataframe.empty:
         stock_list = []
         for index, row in dataframe.iterrows():
@@ -400,7 +399,7 @@ def insert_sz_hk_stock_change():
                 instance.change_date = change_date
                 instance.cn_name = cn_name
                 instance.change = change
-                instance.market = "SZ"
+                instance.market = market
                 stock_list.append(instance)
 
         database_session.bulk_save_objects(stock_list)
@@ -413,7 +412,7 @@ def insert_sse_hk_stock():
     :return:
     """
     sse_frame = request.get_sse_hk_stock()
-
+    market = 'SH'
     if sse_frame is not None and not sse_frame.empty:
 
         stock_list = []
@@ -421,12 +420,11 @@ def insert_sse_hk_stock():
 
             code = row["证券代码"]
             cn_name = row["中文简称"]
-
-            if not CN_HK_Stock.exist(code):
+            if not CN_HK_Stock.exist(code, market):
                 instance = CN_HK_Stock()
                 instance.code = code
                 instance.cn_name = cn_name
-                instance.market = "SH"
+                instance.market = market
                 stock_list.append(instance)
         database_session.bulk_save_objects(stock_list)
         database_session.commit()
@@ -438,7 +436,7 @@ def insert_hk_stock_change():
     :return:
     """
     change_frame = request.get_sse_hk_stock_change()
-
+    market = 'SH'
     if change_frame is not None and not change_frame.empty:
         stock_list = []
         for index, row in change_frame.iterrows():
@@ -455,7 +453,7 @@ def insert_hk_stock_change():
                 instance.change_date = change_date
                 instance.cn_name = cn_name
                 instance.change = change
-                instance.market = "SH"
+                instance.market = market
                 stock_list.append(instance)
 
         database_session.bulk_save_objects(stock_list)

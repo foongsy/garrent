@@ -7,12 +7,18 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 from rq import Queue
-from redis import Redis
+from redis import StrictRedis
+from rq import get_failed_queue, push_connection
 
 today = datetime.date.today()
 
-redis_conn = Redis()
+redis_conn = StrictRedis()
+queue = Queue(connection=redis_conn)
 ccass_q = Queue('ccass',connection=redis_conn)
+buyback_q = Queue('buyback',connection=redis_conn)
+shareholder_q = Queue('shareholder',connection=redis_conn)
+
+from garrent.jobs import update_stock
 
 @click.group()
 def run():
@@ -36,19 +42,7 @@ def status():
 @run.command()
 @click.option('--cleanup', is_flag=True, help='Empty the list before updating')
 def stock(cleanup):
-    if cleanup:
-        click.echo('Cleanup existing stock list')
-        try:
-            conn = pymysql_conn()
-            with conn.cursor() as cursor:
-                sql = 'TRUNCATE stock;'
-                cursor.execute(sql)
-            conn.commit()
-        finally:
-            conn.close()
-    click.echo('Updating Hong Kong stock list')
-    from garrent.tasks import insert_stock
-    insert_stock()
+    return update_stock(cleanup)
 
 @run.command()
 @click.option('--cleanup', is_flag=True, help='Empty the list before updating')
@@ -110,6 +104,25 @@ def shareholder(date,daysback):
         click.echo('- Done')
 
 @run.command()
+@click.option('--daysback', nargs=1, type=int, help="Update shareholding from N days before specific date, inclusively")
+@click.argument('date', type=str)
+def q_shareholder(date,daysback):
+    if date:
+        p_date = parser.parse(date)
+        from garrent.tasks import insert_share_holding
+        click.echo('- Date specified {}...'.format(date))
+        from garrent.pw_models import Stock
+        stocks = Stock.select().where(Stock.board == 'M')
+        if daysback:
+            start_date = p_date - datetime.timedelta(days=daysback)
+        else:
+            start_date = p_date
+        click.echo('- Start from {} till {}'.format(datetime.date.strftime(start_date, "%Y-%m-%d"),datetime.date.strftime(p_date, "%Y-%m-%d")))
+        for s in stocks:
+            shareholder_q.enqueue(insert_share_holding,s.code, start_date, p_date)
+        click.echo('- Done')
+
+@run.command()
 @click.argument('date', type=str)
 def q_ccass(date):
     if date:
@@ -122,7 +135,7 @@ def q_ccass(date):
         logging.debug('[ccass] number of stocks to be process: {}'.format(len(stocks)))
         for s in stocks:
             logging.debug('[ccass] working on: {}, {}'.format(s.code,p_date.date))
-            ccass_q.enqueue(insert_ccass_stock_holding_and_snapshot,s.code,p_date)
+            ccass_q.enqueue(insert_ccass_stock_holding_and_snapshot, s.code, p_date)
 
 @run.command()
 @click.argument('date', type=str)
@@ -170,7 +183,6 @@ def ipo():
         inster_stock_IPO_info(s.code)
         logging.debug('[ipo_info] : {}'.format(s.code))
 
-
 @run.command()
 def sbstock():
     from garrent.tasks import insert_sz_hk_stock
@@ -178,11 +190,17 @@ def sbstock():
     insert_sse_hk_stock()
     insert_sz_hk_stock()
 
+@run.command()
+def failed():
+    push_connection(redis_conn)
+    failed = get_failed_queue()
+    for j in failed:
+        print(j)
 
-#insert_sse_hk_stock
+
 #insert_hk_stock_change
-#insert_list_IPO
 #insert_stock_connect
+#insert_list_IPO
 #inster_stock_IPO_info
 
 

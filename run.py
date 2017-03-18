@@ -18,7 +18,7 @@ ccass_q = Queue('ccass',connection=redis_conn)
 buyback_q = Queue('buyback',connection=redis_conn)
 shareholder_q = Queue('shareholder',connection=redis_conn)
 
-from garrent.jobs import update_stock
+from garrent.jobs import update_stock, update_ccassplayer
 
 @click.group()
 def run():
@@ -42,24 +42,12 @@ def status():
 @run.command()
 @click.option('--cleanup', is_flag=True, help='Empty the list before updating')
 def stock(cleanup):
-    return update_stock(cleanup)
+    return update_stock(cleanup=cleanup)
 
 @run.command()
 @click.option('--cleanup', is_flag=True, help='Empty the list before updating')
 def ccassplayer(cleanup):
-    if cleanup:
-        click.echo('Cleanup existing CCASS player list')
-        try:
-            conn = pymysql_conn()
-            with conn.cursor() as cursor:
-                sql = 'TRUNCATE ccass_player;'
-                cursor.execute(sql)
-            conn.commit()
-        finally:
-            conn.close()
-    click.echo('Updating CCASS player')
-    from garrent.tasks import insert_ccass_player
-    insert_ccass_player()
+    return update_ccassplayer(cleanup=cleanup)
 
 @run.command()
 @click.option('--daysback', nargs=1, type=int, help="Update buyback from N days before specific date, inclusively")
@@ -194,7 +182,7 @@ def sbstock():
 def failed():
     push_connection(redis_conn)
     failed = get_failed_queue()
-    for j in failed:
+    for j in failed.jobs:
         print(j)
 
 

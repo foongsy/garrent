@@ -2,15 +2,19 @@
 
 from redis import StrictRedis
 from rq_scheduler import Scheduler
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 
 from garrent.jobs import update_stock
+from garrent.jobs import update_ccassplayer
 
 conn = StrictRedis(host='localhost',port=6379)
 scheduler = Scheduler(connection=conn)
-
+scheduler.enqueue_at(datetime.utcnow(), update_stock)
+scheduler.enqueue_at(datetime.utcnow(), update_ccassplayer)
+"""
 scheduler.schedule(
-    scheduled_time=datetime(2017,3,17,3,20),
+    scheduled_time=datetime.utcnow(), #+timedelta(minutes=1),
     func=update_stock,
     args=[True])
+"""

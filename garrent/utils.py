@@ -2,7 +2,6 @@ import math
 import re
 import decimal
 
-
 def is_NaN(value):
     """
     check value is nan or not

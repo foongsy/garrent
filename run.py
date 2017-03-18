@@ -127,7 +127,7 @@ def q_ccass(date):
         click.echo('- Date specified {}...'.format(date))
         from garrent.tasks import insert_ccass_stock_holding_and_snapshot
         from garrent.pw_models import Stock
-        stocks = Stock.select(Stock.active == True)
+        stocks = Stock.select().where(Stock.active == True)
         loggerr.info('[q_ccass] number of stocks to be process: {}'.format(len(stocks)))
         for s in stocks:
             loggerr.info('[q_ccass] working on: {}, {}'.format(s.code,p_date.date))

@@ -3,6 +3,7 @@ import click
 import datetime
 from dateutil import parser, rrule
 from garrent.database import pymysql_conn
+from datetime import timedelta
 
 # Loggly setting
 import logging
@@ -119,20 +120,28 @@ def q_shareholder(date,daysback):
         click.echo('- Done')
 
 @run.command()
-@click.argument('date', type=str)
-def q_ccass(date):
-    if date:
-        loggerr.info('[ccass] date: {}'.format(date))
-        p_date = parser.parse(date)
-        click.echo('- Date specified {}...'.format(date))
+@click.argument('start_date', type=str)
+@click.argument('end_date', type=str)
+def q_ccass(start_date,end_date):
+    if start_date and end_date:
+        loggerr.info('[q_ccass] date: {}-{}'.format(start_date,end_date))
+        p_start_date = parser.parse(start_date)
+        p_end_date = parser.parse(end_date)
+        click.echo('- Date specified {}-{}'.format(p_start_date,p_end_date))
         from garrent.tasks import insert_ccass_stock_holding_and_snapshot
         from garrent.pw_models import Stock
         stocks = Stock.select().where(Stock.active == True)
         loggerr.info('[q_ccass] number of stocks to be process: {}'.format(len(stocks)))
-        for s in stocks:
-            loggerr.info('[q_ccass] working on: {}, {}'.format(s.code,p_date.date))
-            ccass_q.enqueue(insert_ccass_stock_holding_and_snapshot, s.code, p_date)
+        cur_date = p_start_date
+        while cur_date <= p_end_date:
+            if cur_date.weekday() < 5:
+                for s in stocks:
+                    loggerr.info('[q_ccass] working on: {}, {}'.format(s.code,cur_date.date()))
+                    #click.echo('[q_ccass] working on: {}, {}'.format(s.code,cur_date.date()))
+                    ccass_q.enqueue(insert_ccass_stock_holding_and_snapshot, s.code, cur_date)
+            cur_date += timedelta(days=1)
 
+"""
 @run.command()
 @click.argument('date', type=str)
 def ccass(date):
@@ -147,6 +156,7 @@ def ccass(date):
         for s in stocks:
             loggerr.info('[ccass] working on: {}, {}'.format(s.code,p_date.date))
             insert_ccass_stock_holding_and_snapshot(s.code,p_date)
+"""
 
 @run.command()
 @click.argument('date', type=str)

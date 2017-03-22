@@ -79,7 +79,7 @@ def buyback(date,daysback):
     if period:
         click.echo('  Updating buyback for {} to {}'.format(*period))
 """
-
+"""
 @run.command()
 @click.option('--daysback', nargs=1, type=int, help="Update shareholding from N days before specific date, inclusively")
 @click.argument('date', type=str)
@@ -89,7 +89,7 @@ def shareholder(date,daysback):
         from garrent.tasks import insert_share_holding
         click.echo('- Date specified {}...'.format(date))
         from garrent.pw_models import Stock
-        stocks = Stock.select().where(Stock.board == 'M')
+        stocks = Stock.select()
         if daysback:
             start_date = p_date - datetime.timedelta(days=daysback)
         else:
@@ -98,26 +98,24 @@ def shareholder(date,daysback):
         for s in stocks:
             insert_share_holding(s.code, start_date, p_date)
         click.echo('- Done')
+"""
 
 @run.command()
-@click.option('--daysback', nargs=1, type=int, help="Update shareholding from N days before specific date, inclusively")
-@click.argument('date', type=str)
-def q_shareholder(date,daysback):
-    if date:
-        p_date = parser.parse(date)
+@click.argument('start_date', type=str)
+@click.argument('end_date', type=str)
+def q_shareholder(start_date,end_date):
+    if start_date and end_date:
+        loggerr.info('[q_shareholder] date: {}-{}'.format(start_date, end_date))
+        p_start_date = parser.parse(start_date)
+        p_end_date = parser.parse(end_date)
         from garrent.tasks import insert_share_holding
-        click.echo('- Date specified {}...'.format(date))
+        click.echo('- Date specified {}-{}'.format(p_start_date, p_end_date))
         from garrent.pw_models import Stock
-        stocks = Stock.select().where(Stock.board == 'M')
-        if daysback:
-            start_date = p_date - datetime.timedelta(days=daysback)
-        else:
-            start_date = p_date
-        click.echo('- Start from {} till {}'.format(datetime.date.strftime(start_date, "%Y-%m-%d"),datetime.date.strftime(p_date, "%Y-%m-%d")))
+        stocks = Stock.select().where(Stock.active == True)
+        loggerr.info('[q_shareholder] number of stocks to be process: {}'.format(len(stocks)))
         for s in stocks:
-            loggerr.info('[q_shareholder] code={}, start_date={}, p_date={}'.format(s.code,start_date,p_date))
-            shareholder_q.enqueue(insert_share_holding,s.code, start_date, p_date)
-        click.echo('- Done')
+            loggerr.info('[q_shareholder] code={}, start_date={}, p_date={}'.format(s.code, p_start_date, p_end_date))
+            shareholder_q.enqueue(insert_share_holding, s.code, p_start_date, p_end_date)
 
 @run.command()
 @click.argument('start_date', type=str)
@@ -137,7 +135,6 @@ def q_ccass(start_date,end_date):
             if cur_date.weekday() < 5:
                 for s in stocks:
                     loggerr.info('[q_ccass] working on: {}, {}'.format(s.code,cur_date.date()))
-                    #click.echo('[q_ccass] working on: {}, {}'.format(s.code,cur_date.date()))
                     ccass_q.enqueue(insert_ccass_stock_holding_and_snapshot, s.code, cur_date)
             cur_date += timedelta(days=1)
 
@@ -159,14 +156,17 @@ def ccass(date):
 """
 
 @run.command()
-@click.argument('date', type=str)
-def sbtop10(date):
-    if date:
-        loggerr.info('[sbtop10] date: {}'.format(date))
-        p_date = parser.parse(date)
-        click.echo('- Date specified {}...'.format(date))
+@click.argument('start_date', type=str)
+@click.argument('end_date', type=str)
+def sbtop10(start_date, end_date):
+    if start_date and end_date:
+        loggerr.info('[sbtop10] date: {}-{}'.format(start_date,end_date))
+        p_start_date = parser.parse(start_date)
+        p_end_date = parser.parse(end_date)
+        click.echo('- Date specified {}-{}'.format(p_start_date,p_end_date))
         from garrent.tasks import insert_stock_top_10
-        insert_stock_top_10(p_date)
+        for cur_date in rrule.rrule(freq=rrule.DAILY, dtstart=p_start_date, until=p_end_date):
+            insert_stock_top_10(cur_date)
 
 @run.command()
 @click.argument('date', type=str)

@@ -272,13 +272,15 @@ def get_disclosure_interests(code, start_date: datetime.date, end_date: datetime
     :param end_date: datetime.date
     :return: DataFrame or None
     """
-    ua = UserAgent()
-    headers = {"Connection" : "close", "User-Agent" : ua.random}
+
+    # HKEX shareholder list only display data in the langauge you previous visited, so needed to use session
+    httpsess = requests.Session()
+    ua = UserAgent().random
+    headers = {"User-Agent" : ua}
     if isinstance(start_date, str):
         start_date = parser.parse(start_date).date()
     if isinstance(end_date, str):
         end_date = parser.parse(end_date).date()
-
     base_link = "http://sdinotice.hkex.com.hk/di/"
     url = ("http://sdinotice.hkex.com.hk/di/NSSrchCorpList.aspx?"
            "sa1=cl&"
@@ -287,15 +289,16 @@ def get_disclosure_interests(code, start_date: datetime.date, end_date: datetime
            "sc={code}&src=MAIN&lang=ZH").format(start_date=start_date.strftime("%d/%m/%Y"),
                                                 end_date=end_date.strftime("%d/%m/%Y"),
                                                 code=code)
-    response = requests.get(url, headers=headers)
+    response = httpsess.get(url, headers=headers)
     if response.status_code == 200:
+        httpsess.headers.update({'Referer': url})
         search_soup = BeautifulSoup(response.content, "html5lib")
         table = search_soup.find(id="grdPaging")
         if table:
             tag_a = table.find("a", text="大股東名單")
             if tag_a:
                 link = base_link + tag_a["href"]
-                disclosure_response = requests.get(link, headers=headers)
+                disclosure_response = httpsess.get(link, headers=headers)
                 if disclosure_response.status_code == 200:
                     soup = BeautifulSoup(disclosure_response.content, "html5lib")
                     disclosure_table = soup.find("table", id="grdPaging")

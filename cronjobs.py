@@ -18,3 +18,16 @@ scheduler.schedule(
     func=update_stock,
     args=[True])
 """
+"""
+Crontab schedule for tasks
+m h dom mon dow
+0 7 * * 1-6 update_stock
+0 4 * * 1-6 update_ccassplayer
+5 4 * * 1-6 update_sbstock
+10 4 * * 1-6 update_sbstock_change
+0 2 * * 2-6 update_buyback
+5 2 * * 2-6 update_shareholders
+0 19 * * 1-5 update_shortsell
+0 22 * * 1-5 update_ccass
+0 1 * * 2-6 update_sbholdings
+"""

@@ -16,7 +16,8 @@ from garrent.models import (Stock,
                             CN_HK_Stock,
                             StockChange,
                             TopTen,
-                            HkSnapshot)
+                            HkSnapshot,
+                            SBHolding)
 from garrent import request
 from garrent.utils import parse_int, is_NaN, convert_currency, convert_code, convert_float, parse_float
 
@@ -595,4 +596,18 @@ def insert_list_IPO():
                 ipo_list.append(instance)
 
         database_session.bulk_save_objects(ipo_list)
+        database_session.commit()
+
+def insert_sbholding(date):
+    sbholdings = request.get_sbholding(date)
+    if sbholdings is not None and not sbholdings.empty:
+        sbh_list = []
+        for index, row in sbholdings.iloc[1:,:].iterrows():
+            instance = SBHolding()
+            instance.date = date
+            instance.code = convert_code(row[0])
+            instance.holding = parse_int(row[2])
+            instance.percent = parse_float(row[3])
+            sbh_list.append(instance)
+        database_session.bulk_save_objects(sbh_list)
         database_session.commit()

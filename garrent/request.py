@@ -639,3 +639,41 @@ def get_sz_hk_change():
     data_frame = pandas.read_excel(url,converters={"港股代码":str})
 
     return data_frame
+
+def get_sbholding(date: datetime.date):
+    """
+    http://www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=hk
+    """
+    url = 'http://www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=hk'
+    if isinstance(date, str):
+        date = parser.parse(date).date()
+    today = datetime.date.today()
+    httpsess = requests.Session()
+    response = httpsess.get(url)
+    if response.status_code == 200:
+        form_soup = BeautifulSoup(response.content, "lxml")
+        view_state = form_soup.find(id="__VIEWSTATE")["value"]
+        view_stage_generator = form_soup.find(id="__VIEWSTATEGENERATOR")["value"]
+        event_validation = form_soup.find(id="__EVENTVALIDATION")["value"]
+        headers = {"Host": "www.hkexnews.hk",
+                   "Origin": "http://www.hkexnews.hk",
+                   "User-Agent" : fakeua.random,
+                   "Referer": url}
+        data = {"today": today.strftime("%Y%m%d"),
+                "__VIEWSTATE": view_state,
+                "__VIEWSTATEGENERATOR": view_stage_generator,
+                "__EVENTVALIDATION": event_validation,
+                "ddlShareholdingDay": date.strftime("%d"),
+                "ddlShareholdingMonth": date.strftime("%m"),
+                "ddlShareholdingYear": date.strftime("%Y"),
+                "btnSearch.x": "24",
+                "btnSearch.y": "11"}
+
+        sb_request = httpsess.post(url, headers=headers, data=data)
+        if sb_request.status_code == 200:
+            soup = BeautifulSoup(sb_request.content, "lxml")
+            holding_table = soup.find("table", class_="result-table")
+            if holding_table:
+                holding_data = pandas.read_html(holding_table.prettify(), flavor="bs4", keep_default_na=True)
+                holding_data = holding_data[0].dropna()
+                return holding_data

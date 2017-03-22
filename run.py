@@ -203,6 +203,11 @@ def failed():
     for j in failed.jobs:
         print(j)
 
+@run.command()
+@click.argument('date', type=str)
+def sbholding(date):
+    from garrent.tasks import insert_sbholding
+    insert_sbholding(date)
 
 #insert_hk_stock_change
 #insert_stock_connect

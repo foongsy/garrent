@@ -405,3 +405,14 @@ class CN_HK_Stock(Base, BaseMixin2):
         :return:
         """
         return database_session.query(exists().where(and_(cls.code == code, cls.market == market))).scalar()
+
+class SBHolding(Base):
+    __tablename__ = "sb_holding"
+    id = Column(Integer, primary_key=True)
+    code =Column(String(20))
+    date = Column(Date, default=py_date.today)
+    holding = Column(BigInteger)
+    percent = Column(Float)
+    @classmethod
+    def exist(date, code):
+        return database_session.query(exists()).where(and_(cls.code == code, cls.date == date)).scalar()

@@ -207,7 +207,9 @@ def failed():
 @click.argument('date', type=str)
 def sbholding(date):
     from garrent.tasks import insert_sbholding
-    insert_sbholding(date)
+    cur_date = parser.parse(date)
+    if cur_date.weekday() < 5:
+        insert_sbholding(cur_date)
 
 #insert_hk_stock_change
 #insert_stock_connect

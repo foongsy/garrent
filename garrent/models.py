@@ -413,6 +413,7 @@ class SBHolding(Base):
     date = Column(Date, default=py_date.today)
     holding = Column(BigInteger)
     percent = Column(Float)
+    changes = Column(BigInteger)
     @classmethod
     def exist(date, code):
         return database_session.query(exists()).where(and_(cls.code == code, cls.date == date)).scalar()

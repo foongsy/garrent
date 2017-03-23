@@ -20,9 +20,12 @@ ON a.code = b.code AND a.date = b.nextday
 SET a.changes = a.holding - b.pholding
 
 -- CCASS changes, handle non-consecutive closet day
-SELECT a.*, b.date FROM sb_holding a INNER JOIN
-(
-  SELECT code, date FROM sb_holding WHERE b.date < a.date LIMIT 1 ORDER BY b.date DESC
-) AS b
+
+SELECT a.*,b.date as b_date, b.holding as b_holding, DATEDIFF(a.date,b.date) as daysdiff FROM sb_holding a INNER JOIN sb_holding b
 ON a.code = b.code
-WHERE a.changes IS NULL
+WHERE a.date > b.date AND b.changes IS NULL AND daysdiff =
+(
+  SELECT DATEDIFF(a.date,b.date)
+  FROM sb_holding a INNER JOIN sb_holding b
+  ON a.code = b.code AND a.date > b.date AND b.changes IS NULL
+)

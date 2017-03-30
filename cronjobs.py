@@ -20,17 +20,85 @@ def hkt_to_utc(t):
 conn = StrictRedis(host='localhost',port=6379)
 scheduler = Scheduler(connection=conn)
 
-# scheduler.cron('10 18 * * 0-5', func=update_stock, args=[], kwargs={}, repeat=None, queue_name='stock')
+hk_yday = datetime.now()-datetime.timedelta(days=1)
+hk_today = datetime.now()
+
+# Update all stock list at local time '0 7 * * 1-6'
+scheduler.cron(
+    '0 23 * * 0-5',
+    func=update_stock,
+    args=[],
+    kwargs={},
+    repeat=None,
+    queue_name='stock')
+
+# Update ccass player list at local time '0 4 * * 1-6'
+scheduler.cron(
+    '0 20 * * 0-5',
+    func=update_ccassplayer,
+    args=[],
+    kwargs={},
+    repeat=None,
+    queue_name='ccass_player')
+
+# Update sbstock list at local time '5 4 * * 1-6'
+scheduler.cron(
+    '5 20 * * 0-5',
+    func=update_sbstock,
+    args=[],
+    kwargs={},
+    repeat=None,
+    queue_name='sbstock')
+
+"""
+# Update sbstock change at local time '10 4 * * 1-6'
+scheduler.cron(
+    '10 20 * * 0-5',
+    func=update_sbstock_change,
+    args=[],
+    kwargs={},
+    repeat=None,
+    queue_name='sbstock')
+"""
+
+# Update update_buyback at local time '0 2 * * 2-6'
+scheduler.cron(
+    '0 18 * * 1-5',
+    func=update_buyback,
+    args=[],
+    kwargs={'today': hk_yday},
+    repeat=None,
+    queue_name='buyback')
+
+# Update update_shareholders at local time '5 2 * * 2-6'
+scheduler.cron(
+    '5 18 * * 1-5',
+    func=update_shareholders,
+    args=[],
+    kwargs={'today': hk_yday},
+    repeat=None,
+    queue_name='shareholders')
+
+# Update update_shortsell at local time '30 22 * * 1-5'
+scheduler.cron(
+    '30 14 * * 1-5',
+    func=update_shortsell,
+    args=[],
+    kwargs={'today': hk_today},
+    repeat=None,
+    queue_name='shortsell')
+
+# Update update_ccass at local time '30 0 * * 2-6'
+scheduler.cron(
+    '30 16 * * 1-5',
+    func=update_ccass,
+    args=[],
+    kwargs={'today', hk_yday},
+    repeat=None,
+    queue_name='ccass')
+
 """
 Crontab schedule for tasks
 m h dom mon dow
-0 7 * * 1-6 update_stock
-'0 4 * * 1-6' update_ccassplayer
-'5 4 * * 1-6' update_sbstock
-'10 4 * * 1-6' update_sbstock_change
-'0 2 * * 2-6' update_buyback
-'5 2 * * 2-6' update_shareholders
-'0 19 * * 1-5' update_shortsell
-'0 22 * * 1-5' update_ccass
 '0 1 * * 2-6' update_sbholdings
 """

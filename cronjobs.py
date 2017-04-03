@@ -89,6 +89,7 @@ scheduler.cron(
     queue_name='shortsell')
 
 # Update update_ccass at local time '30 0 * * 2-6'
+"""
 scheduler.cron(
     '30 16 * * 1-5',
     func=update_ccass,
@@ -96,7 +97,7 @@ scheduler.cron(
     kwargs={'today', hk_yday},
     repeat=None,
     queue_name='ccass')
-
+"""
 """
 Crontab schedule for tasks
 m h dom mon dow

@@ -53,7 +53,7 @@ def update_ccassplayer(cleanup=True):
     loggerr.info('calls with cleanup')
     insert_ccass_player()
 
-def update_sbstocks(cleanup=True):
+def update_sbstock(cleanup=True):
     if cleanup:
         try:
             conn = pymysql_conn()
@@ -78,9 +78,9 @@ def update_buyback(cleanup=False, today=False):
             conn.commit()
         finally:
             conn.close()
-    if isinstance(today, datetime.datetime)
-    from garrent.tasks import insert_repurchases_report
-    insert_repurchases_report(today)
+    if isinstance(today, datetime.datetime):
+        from garrent.tasks import insert_repurchases_report
+        insert_repurchases_report(today)
 
 def update_shareholders(cleanup=False, today=False):
     if cleanup:

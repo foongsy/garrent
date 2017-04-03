@@ -7,6 +7,10 @@ import pytz
 
 from garrent.jobs import update_stock
 from garrent.jobs import update_ccassplayer
+from garrent.jobs import update_sbstock
+from garrent.jobs import update_buyback
+from garrent.jobs import update_shareholders
+from garrent.jobs import update_shortsell
 
 
 def hkt_to_utc(t):
@@ -20,7 +24,7 @@ def hkt_to_utc(t):
 conn = StrictRedis(host='localhost',port=6379)
 scheduler = Scheduler(connection=conn)
 
-hk_yday = datetime.now()-datetime.timedelta(days=1)
+hk_yday = datetime.now() - timedelta(days=1)
 hk_today = datetime.now()
 
 # Update all stock list at local time '0 7 * * 1-6'

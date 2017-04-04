@@ -5,6 +5,7 @@ from dateutil import parser, rrule
 from garrent.database import pymysql_conn
 from datetime import timedelta
 
+"""
 # Loggly setting
 import logging
 import logging.config
@@ -12,6 +13,17 @@ import loggly.handlers
 
 logging.config.fileConfig('logging.conf')
 loggerr = logging.getLogger(__name__)
+#
+"""
+# Logentries setting
+from logentries import LogentriesHandler
+import logging
+import time
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+iamsophy = LogentriesHandler('c4a32ee2-0da7-4064-be11-7ec4bca79069')
+log.addHandler(iamsophy)
 #
 
 from rq import Queue
@@ -50,11 +62,13 @@ def status():
 @run.command()
 @click.option('--cleanup', is_flag=True, help='Empty the list before updating')
 def stock(cleanup):
+    log.info('update_stock')
     return update_stock(cleanup=cleanup)
 
 @run.command()
 @click.option('--cleanup', is_flag=True, help='Empty the list before updating')
 def ccassplayer(cleanup):
+    log.info('update_ccassplayer')
     return update_ccassplayer(cleanup=cleanup)
 
 @run.command()

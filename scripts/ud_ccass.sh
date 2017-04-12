@@ -3,6 +3,7 @@
 WORKDIR=$HOME/Bench/garrent
 G_VENVDIR=$HOME/.virtualenvs/garrent/bin
 S_VENVDIR=$HOME/.virtualenvs/sophybot/bin
+export QT_QPA_PLATFORM=offscreen
 # Go to working dir
 cd $HOME/Bench/garrent
 # Update garrent.ccass_player

@@ -38,7 +38,7 @@ ccass_q = Queue('ccass',connection=redis_conn)
 buyback_q = Queue('buyback',connection=redis_conn)
 shareholder_q = Queue('shareholder',connection=redis_conn)
 
-from garrent.jobs import update_stock, update_ccassplayer
+from garrent.jobs import update_stock, update_ccassplayer, update_sbstock
 
 @click.group()
 def run():
@@ -204,11 +204,9 @@ def ipo():
         loggerr.info('[ipo_info] : {}'.format(s.code))
 
 @run.command()
-def sbstock():
-    from garrent.tasks import insert_sz_hk_stock
-    from garrent.tasks import insert_sse_hk_stock
-    insert_sse_hk_stock()
-    insert_sz_hk_stock()
+@click.option('--cleanup', is_flag=True, help='Empty the list before updating')
+def sbstock(cleanup):
+    update_sbstock(cleanup)
 
 @run.command()
 def failed():

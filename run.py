@@ -12,7 +12,7 @@ import logging.config
 import loggly.handlers
 
 logging.config.fileConfig('logging.conf')
-loggerr = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 #
 """
 # Logentries setting
@@ -119,16 +119,16 @@ def shareholder(date,daysback):
 @click.argument('end_date', type=str)
 def q_shareholder(start_date,end_date):
     if start_date and end_date:
-        loggerr.info('[q_shareholder] date: {}-{}'.format(start_date, end_date))
+        log.info('[q_shareholder] date: {}-{}'.format(start_date, end_date))
         p_start_date = parser.parse(start_date)
         p_end_date = parser.parse(end_date)
         from garrent.tasks import insert_share_holding
         click.echo('- Date specified {}-{}'.format(p_start_date, p_end_date))
         from garrent.pw_models import Stock
         stocks = Stock.select().where(Stock.active == True)
-        loggerr.info('[q_shareholder] number of stocks to be process: {}'.format(len(stocks)))
+        log.info('[q_shareholder] number of stocks to be process: {}'.format(len(stocks)))
         for s in stocks:
-            loggerr.info('[q_shareholder] code={}, start_date={}, p_date={}'.format(s.code, p_start_date, p_end_date))
+            log.info('[q_shareholder] code={}, start_date={}, p_date={}'.format(s.code, p_start_date, p_end_date))
             shareholder_q.enqueue(insert_share_holding, s.code, p_start_date, p_end_date)
 
 @run.command()
@@ -136,19 +136,19 @@ def q_shareholder(start_date,end_date):
 @click.argument('end_date', type=str)
 def q_ccass(start_date,end_date):
     if start_date and end_date:
-        loggerr.info('[q_ccass] date: {}-{}'.format(start_date,end_date))
+        log.info('[q_ccass] date: {}-{}'.format(start_date,end_date))
         p_start_date = parser.parse(start_date)
         p_end_date = parser.parse(end_date)
         click.echo('- Date specified {}-{}'.format(p_start_date,p_end_date))
         from garrent.tasks import insert_ccass_stock_holding_and_snapshot
         from garrent.pw_models import Stock
         stocks = Stock.select().where(Stock.active == True)
-        loggerr.info('[q_ccass] number of stocks to be process: {}'.format(len(stocks)))
+        log.info('[q_ccass] number of stocks to be process: {}'.format(len(stocks)))
         cur_date = p_start_date
         while cur_date <= p_end_date:
             if cur_date.weekday() < 5:
                 for s in stocks:
-                    loggerr.info('[q_ccass] working on: {}, {}'.format(s.code,cur_date.date()))
+                    log.info('[q_ccass] working on: {}, {}'.format(s.code,cur_date.date()))
                     ccass_q.enqueue(insert_ccass_stock_holding_and_snapshot, s.code, cur_date)
             cur_date += timedelta(days=1)
 
@@ -157,15 +157,15 @@ def q_ccass(start_date,end_date):
 @click.argument('date', type=str)
 def ccass(date):
     if date:
-        loggerr.info('[ccass] date: {}'.format(date))
+        log.info('[ccass] date: {}'.format(date))
         p_date = parser.parse(date)
         click.echo('- Date specified {}...'.format(date))
         from garrent.tasks import insert_ccass_stock_holding_and_snapshot
         from garrent.pw_models import Stock
         stocks = Stock.select()
-        loggerr.info('[ccass] number of stocks to be process: {}'.format(len(stocks)))
+        log.info('[ccass] number of stocks to be process: {}'.format(len(stocks)))
         for s in stocks:
-            loggerr.info('[ccass] working on: {}, {}'.format(s.code,p_date.date))
+            log.info('[ccass] working on: {}, {}'.format(s.code,p_date.date))
             insert_ccass_stock_holding_and_snapshot(s.code,p_date)
 """
 
@@ -174,7 +174,7 @@ def ccass(date):
 @click.argument('end_date', type=str)
 def sbtop10(start_date, end_date):
     if start_date and end_date:
-        loggerr.info('[sbtop10] date: {}-{}'.format(start_date,end_date))
+        log.info('[sbtop10] date: {}-{}'.format(start_date,end_date))
         p_start_date = parser.parse(start_date)
         p_end_date = parser.parse(end_date)
         click.echo('- Date specified {}-{}'.format(p_start_date,p_end_date))
@@ -186,7 +186,7 @@ def sbtop10(start_date, end_date):
 @click.argument('date', type=str)
 def shortsell(date):
     if date:
-        loggerr.info('[shortsell] date: {}'.format(date))
+        log.info('[shortsell] date: {}'.format(date))
         p_date = parser.parse(date)
         click.echo('- Date specified {}...'.format(date))
         from garrent.tasks import insert_short_sell
@@ -201,7 +201,7 @@ def ipo():
     stocks = StockIpo.select(StockIpo.code).where(StockIpo.company_name.is_null())
     for s in stocks:
         inster_stock_IPO_info(s.code)
-        loggerr.info('[ipo_info] : {}'.format(s.code))
+        log.info('[ipo_info] : {}'.format(s.code))
 
 @run.command()
 @click.option('--cleanup', is_flag=True, help='Empty the list before updating')

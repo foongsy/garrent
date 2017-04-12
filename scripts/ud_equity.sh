@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
+# Setting paths
+WORKDIR=$HOME/Bench/garrent
+G_VENVDIR=$HOME/.virtualenvs/garrent/bin
+S_VENVDIR=$HOME/.virtualenvs/sophybot/bin
+# Go to working dir
 cd $HOME/Bench/garrent
 # Update garrent.stock
-$HOME/.virtualenvs/garrent/bin/python3 run.py stock --cleanup
+$G_VENVDIR/python3 run.py stock --cleanup
 # Update garrent.sbstock
-$HOME/.virtualenvs/garrent/bin/python3 run.py sbstock --cleanup
+$G_VENVDIR/python3 run.py sbstock --cleanup
+# Go to working dir
 cd $HOME/Bench/sophybot
 # Update iamsophy.Equity
-$HOME/.virtualenvs/sophybot/bin/python3 run.py update_equity
+$S_VENVDIR/python3 run.py update_equity

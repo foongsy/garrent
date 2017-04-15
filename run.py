@@ -22,7 +22,7 @@ import time
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
-iamsophy = LogentriesHandler('c4a32ee2-0da7-4064-be11-7ec4bca79069')
+iamsophy = LogentriesHandler('9e7d01fc-3617-4d2f-aebe-ecadc96eaa16')
 log.addHandler(iamsophy)
 #
 
@@ -38,7 +38,7 @@ ccass_q = Queue('ccass',connection=redis_conn)
 buyback_q = Queue('buyback',connection=redis_conn)
 shareholder_q = Queue('shareholder',connection=redis_conn)
 
-from garrent.jobs import update_stock, update_ccassplayer, update_sbstock
+from garrent.jobs import update_stock, update_ccassplayer, update_sbstock, update_buyback
 
 @click.group()
 def run():
@@ -89,10 +89,22 @@ def buyback(date,daysback):
         else:
             insert_repurchases_report(p_date)
             click.echo('- Done')
-"""
-    if period:
-        click.echo('  Updating buyback for {} to {}'.format(*period))
-"""
+
+@run.command()
+@click.argument('start_date', type=str)
+@click.argument('end_date', type=str)
+def q_buyback(start_date,end_date):
+    if start_date and end_date:
+        log.info('[q_buyback] date: {}-{}'.format(start_date,end_date))
+        p_start_date = parser.parse(start_date)
+        p_end_date = parser.parse(end_date)
+        click.echo('- Date specified {}-{}'.format(p_start_date,p_end_date))
+        cur_date = p_start_date
+        while cur_date <= p_end_date:
+            if cur_date.weekday() < 5:
+                buyback_q.enqueue(update_buyback)
+
+
 """
 @run.command()
 @click.option('--daysback', nargs=1, type=int, help="Update shareholding from N days before specific date, inclusively")
@@ -148,7 +160,7 @@ def q_ccass(start_date,end_date):
         while cur_date <= p_end_date:
             if cur_date.weekday() < 5:
                 for s in stocks:
-                    log.info('[q_ccass] working on: {}, {}'.format(s.code,cur_date.date()))
+                    #log.info('[q_ccass] working on: {}, {}'.format(s.code,cur_date.date()))
                     ccass_q.enqueue(insert_ccass_stock_holding_and_snapshot, s.code, cur_date)
             cur_date += timedelta(days=1)
 

@@ -3,7 +3,7 @@ import os
 import datetime
 from dateutil import parser, rrule
 from .database import pymysql_conn
-
+"""
 # Loggly setting
 import logging
 import logging.config
@@ -12,18 +12,17 @@ import loggly.handlers
 logging.config.fileConfig('logging.conf')
 loggerr = logging.getLogger(__name__)
 #
+"""
+# Logentries setting
+from logentries import LogentriesHandler
+import logging
+import time
 
-"""
-# ELK setting
-import logstash
-logstash_host = 'elk.iamsophy.com'
-loggerr = logging.getLogger("garrent-jobs")
-elk.setLevel(logging.INFO)
-elk.addHandler(logstash.LogstashHandler(logstash_host, 5959, version=1))
-elk_extras = {
-    'hostname':os.uname()[1]
-    }
-"""
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+iamsophy = LogentriesHandler('9e7d01fc-3617-4d2f-aebe-ecadc96eaa16')
+log.addHandler(iamsophy)
+#
 
 def update_stock(cleanup=True):
     if cleanup:
@@ -36,7 +35,7 @@ def update_stock(cleanup=True):
         finally:
             conn.close()
     from .tasks import insert_stock
-    loggerr.info('calls insert_stock')
+    log.info('calls insert_stock')
     insert_stock()
 
 def update_ccassplayer(cleanup=True):
@@ -50,7 +49,7 @@ def update_ccassplayer(cleanup=True):
         finally:
             conn.close()
     from garrent.tasks import insert_ccass_player
-    loggerr.info('calls with cleanup')
+    log.info('calls with cleanup')
     insert_ccass_player()
 
 def update_sbstock(cleanup=True):
@@ -136,7 +135,7 @@ def update_ccass(cleanup=False, today=False):
 """
 def update_sbstock_change(cleanup=True):
     if cleanup:
-        loggerr.info('update_ccassplayer with cleanup')
+        log.info('update_ccassplayer with cleanup')
         try:
             conn = pymysql_conn()
             with conn.cursor() as cursor:

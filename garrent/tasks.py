@@ -56,10 +56,14 @@ def insert_ccass_stock_holding_and_snapshot(code, date):
                     total_in_ccass = snapshot_frame["於中央結算系統的持股量"]["總數"]  # Shareholding in CCASS Total
                 else:
                     total_in_ccass = None
+                # use iloc instead of text as it presents always
+                total_outstanding = snapshot_frame.iloc[-1][0]
+                """
                 if "已發行股份/權證  (最近更新數目)" in snapshot_frame.index:
                     total_outstanding = snapshot_frame["於中央結算系統的持股量"]["已發行股份/權證  (最近更新數目)"]
                 else:
                     total_outstanding = None
+                """
 
                 # Total number of Issued Shares/Warrants (last updated figure)
 
@@ -94,7 +98,7 @@ def insert_ccass_stock_holding_and_snapshot(code, date):
                         detail_model.code = code
                         detail_model.holding = holding
                         detail_model.player_id = player_id
-                        detail_model.player_name = player_name
+                        #detail_model.player_name = player_name
 
                         stock_holding_list.append(detail_model)
 

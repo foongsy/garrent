@@ -181,7 +181,7 @@ class CCASSDetails(Base, BaseMixin):
     date = Column(Date)
     player_id = Column(String(20))
 
-    player_name = Column(String(200))
+    #player_name = Column(String(200))
     holding = Column(BigInteger)
 
     # set unique with

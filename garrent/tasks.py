@@ -1,5 +1,6 @@
 # encoding:utf-8
 import logging
+import re
 
 from dateutil import parser
 
@@ -475,7 +476,8 @@ def _insert_top_10(dataframe, date, market):
         stock_list = []
         for index, row in dataframe.iterrows():
             # ["Rank", "Stock Code", "Stock Name", "Buy Turnover", "Sell Turnover", "Total Turnover"]
-
+            if not re.match('[0-9]+',row["Stock Code"]):
+                break
             code = convert_code(row["Stock Code"])
             buy_turnover = row["Buy Turnover"]
             sell_turnover = row["Sell Turnover"]
@@ -492,8 +494,9 @@ def _insert_top_10(dataframe, date, market):
                 instance.total = int(total_turnover.replace(",", ""))
 
                 stock_list.append(instance)
-        database_session.bulk_save_objects(stock_list)
-        database_session.commit()
+        if len(stock_list) > 0:
+            database_session.bulk_save_objects(stock_list)
+            database_session.commit()
 
 
 #@celery_app.task(ingore_result=True)

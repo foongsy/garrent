@@ -192,7 +192,9 @@ def sbtop10(start_date, end_date):
         click.echo('- Date specified {}-{}'.format(p_start_date,p_end_date))
         from garrent.tasks import insert_stock_top_10
         for cur_date in rrule.rrule(freq=rrule.DAILY, dtstart=p_start_date, until=p_end_date):
-            insert_stock_top_10(cur_date)
+            if cur_date.weekday() < 5:
+                print(cur_date)
+                insert_stock_top_10(cur_date)
 
 @run.command()
 @click.argument('date', type=str)

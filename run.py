@@ -53,11 +53,17 @@ def initdb():
 
 @run.command()
 def status():
-    from garrent.pw_models import Stock
+    from garrent.pw_models import Stock, CcassSnapshot
+    from peewee import fn
     mainboard = Stock.select().where(Stock.board == 'M')
     gemboard = Stock.select().where(Stock.board == 'G')
     click.echo(" - There are {} main board stocks".format(len(mainboard)))
     click.echo(" - There are {} GEM stocks".format(len(gemboard)))
+    snapshots = CcassSnapshot.select(CcassSnapshot.date, fn.Count(CcassSnapshot.id).alias('num_rows')).where(CcassSnapshot.date < '2017-01-01').group_by(CcassSnapshot.date).order_by(CcassSnapshot.date.desc()).limit(5)
+    click.echo(" - CCASS records before 2017:")
+    for s in snapshots:
+        click.echo("   - Date: {}, number of record: {}".format(s.date, s.num_rows))
+
 
 @run.command()
 @click.option('--cleanup', is_flag=True, help='Empty the list before updating')

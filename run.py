@@ -4,27 +4,18 @@ import datetime
 from dateutil import parser, rrule
 from garrent.database import pymysql_conn
 from datetime import timedelta
+import time
 
-"""
-# Loggly setting
-import logging
-import logging.config
-import loggly.handlers
-
-logging.config.fileConfig('logging.conf')
-log = logging.getLogger(__name__)
-#
-"""
 # Logentries setting
+'''
 from logentries import LogentriesHandler
 import logging
-import time
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
-iamsophy = LogentriesHandler('9e7d01fc-3617-4d2f-aebe-ecadc96eaa16')
+iamsophy = LogentriesHandler("YOUR_LOGENTRIES_ID")
 log.addHandler(iamsophy)
-#
+'''
 
 from rq import Queue
 from redis import StrictRedis

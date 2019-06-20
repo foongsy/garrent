@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+'''
+This is an unfinished cronjob script, please DO NOT USE
+'''
+
 from redis import StrictRedis
 from rq_scheduler import Scheduler
 from datetime import datetime, timedelta

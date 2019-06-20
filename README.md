@@ -2,7 +2,7 @@
 
 Garrent is a personal project of mine to scrap and analyse data from [HKEX](http://www.hkexnews.hk) includes stock list, CCASS, SHHK/SZHK connect, and etc. The script worked fine in late 2018, however due to some changes made by HKEX, some script might not work anymore.
 
-This project was a precedent of a  Wechat Mini Program developed internally by "YY港股圈" (YY Hong Kong Stock Circle, wechat ID: Victoria-hk-stocks). However due to the rapid change of market conditions and sentiment, the project was never launched.
+This project was a precedent of a  Wechat Mini Program developed internally by "YY港股圈" (YY Hong Kong Stock Circle, wechat ID: Victoria-hk-stocks). However due to the rapid change of market conditions and sentiment, the project was never launched. The original plan was to 
 
 The goal of releasing this personal project is to:
 - As a part of my personal portfolio
@@ -10,9 +10,11 @@ The goal of releasing this personal project is to:
 
 ## Background
 
-Garrent does not come with a front-end GUI, the output of the project is a whole bunch of processed data lying on database. Although input does not include trading data (i.e. stock OHLCV data), the data being taken in is considerably much for a personal project, estimated 200-300MB are collected per day. Historical data is available for a year so inital database size would be at least 10GB, without counting the indices. MySQL database optimization knowledege is therefore essential, I recommend O'reilly's *[High Performance MySQL: Optimization, Backups, and Replication](https://www.goodreads.com/book/show/18759121-high-performance-mysql)* as a start.
+Garrent was originally the data backend of a bigger project, therefore it does not come with a front-end GUI. The output of garrent is a whole bunch of processed data lying on database. I might consider releasing the front end, which is an unfinished conversational UI to the data, sometime in the future.
 
-To use this code, understanding of HKEX data structure is as important as technical knowledge. The project intended to cover following data scrapping:
+Although Garrent does not handle trading data (i.e. stock OHLCV data), the data being taken in is considerably numerous for a personal project. Data size of 200-300MB are collected per day approximately. Historical data is available for a year so inital database size would be at least 10GB, without counting the indices. MySQL database optimization knowledege is therefore essential, I recommend O'reilly's *[High Performance MySQL: Optimization, Backups, and Replication](https://www.goodreads.com/book/show/18759121-high-performance-mysql)* as a start.
+
+To use this code, understanding of HKEX data structure is as important as coding skills. The project intended to cover following data scrapping:
 - Stock List*
 - CCASS Participant List
 - Daily shortsell data (from [http://www.analystz.hk](https://www.analystz.hk/short/short-selling-turnover-filter.php))
@@ -20,9 +22,9 @@ To use this code, understanding of HKEX data structure is as important as techni
 - Southbound top 10 list
 - Disclosure Interests
 
-To the date of writing this document, due to web site layout changes, the data scrapping marked with (*) no longer works.
+*To the date of writing this document, due to web site layout changes, the data scrapping marked with (\*) no longer works.*
 
-Furthermore, since the data being scrapped is numerous, garrent uses redis to process data scrapping task.
+Furthermore, since the data being scrapped is numerous, Garrent uses [RQ](https://python-rq.org/docs/) to manage data scrapping task queue.
 
 ### Prerequisites
 
@@ -73,12 +75,17 @@ Supported commands are listed as following.
 
 13) `sbholding`
 
+**3. Cron Jobs**
 
-#### Usage
+There are 3 shell scripts to do the data scrapping and cleansing:
+- `./garrent/scripts/ud_equity.sh`
+    - Update equity list
+- `./garrent/scripts/ud_sbflow.sh`
+    - Update Southbound Top 10 stock lists
+- `./garrent/scripts/ud_ccass.sh`
+    - Update CCASS players and holdings
 
-
-### And coding style tests
-
+The scripts should be ran one by one between 00:00:00 HKT and 06:00:00 HKT after trading day to avoid trading hour lagging. RQ  workers should be set no more than 3 or you might face IP ban from HKEX.
 
 ## Contributing
 

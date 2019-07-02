@@ -2,7 +2,7 @@
 
 Garrent is a personal project of mine to scrap and analyse data from [HKEX](http://www.hkexnews.hk) includes stock list, CCASS, SHHK/SZHK connect, and etc. The script worked fine in late 2018, however due to some changes made by HKEX, some script might not work anymore.
 
-This project was a precedent of a  Wechat Mini Program developed internally by "YY港股圈" (YY Hong Kong Stock Circle, wechat ID: Victoria-hk-stocks). However due to the rapid change of market conditions and sentiment, the project was never launched. The original plan was to 
+This project was a precedent of a  Wechat Mini Program developed internally by "YY港股圈" (YY Hong Kong Stock Circle, wechat ID: Victoria-hk-stocks). However due to the rapid change of market conditions and sentiment, the project was never launched.
 
 The goal of releasing this personal project is to:
 - As a part of my personal portfolio

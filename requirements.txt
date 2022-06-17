@@ -28,7 +28,7 @@ Jinja2==2.9.5
 kombu==4.0.2
 lxml==3.7.3
 MarkupSafe==1.0
-numpy==1.12.0
+numpy==1.21.0
 packaging==16.8
 pandas==0.19.2
 parsel==1.1.0
